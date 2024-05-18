@@ -1,0 +1,19 @@
+{
+    "add": "Add",
+    "button_cancel": "Cancel",
+    "button_create": "Create",
+    "delete": "Delete",
+    "edit": "Edit",
+    "menu_files": "Files",
+    "menu_files_exit": "Exit",
+    "menu_files_export": "Export",
+    "menu_files_import_timeline": "Import timeline",
+    "menu_files_import_video": "Open video",
+    "menu_files_new": "New",
+    "menu_symptoms": "Symptoms",
+    "menu_symptoms_add": "Add symptom",
+    "symptom_tree": "Symptoms",
+    "toolbar_pause": "Pause",
+    "toolbar_play": "Play",
+    "window_add_symptom": "Add a new symptom"
+}

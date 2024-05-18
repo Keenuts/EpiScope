@@ -1,0 +1,5 @@
+Features:
+- allow playing without any video
+
+Bugfix:
+- symptoms dialog: figure out better presentation for checkbox/radio buttons

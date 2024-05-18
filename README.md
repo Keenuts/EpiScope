@@ -19,11 +19,20 @@ These tools enable practitioners to note directly on their patients' epileptic s
 -----------------
   You can find the official Episcope documentation here : https://episcope.readthedocs.io/en/latest/
 
-**Installation :**
+**Running :**
 ----------------
-**with pyinstaller :**
 
-Make sure you have the complete repository whith all dependencies installed.
-In the *Episcope/* folder, you can use the command 
+One time:
 
-`pyinstaller --onefile --icon=.\docs\source\images\logo_cerveau.png  -w ./src/general_interface.py`
+```bash
+virtualenv venv
+. venv/bin/activate
+pip install -r requirements.txt
+```
+
+To run the app:
+
+```bash
+. venv/bin/activate
+python src/app.py
+```
