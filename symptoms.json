@@ -1,0 +1,499 @@
+{
+    "criterias": [
+      {
+        "name": "topography",
+        "type": "mix",
+        "values": [
+          "Body",
+          "Eyelids",
+          "Eyes",
+          "Foot",
+          "Inferior limb",
+          "Hand",
+          "Superior limb",
+          "Head",
+          "Mouth",
+          "Throat"
+        ]
+      },
+      {
+        "name": "lateralized",
+        "type": "exclusive",
+        "values": [
+          "left",
+          "right",
+          "bilateral"
+        ]
+      }
+    ],
+    "symptoms": [
+        {
+            "name": "Subjective",
+            "children": [
+                {
+                    "name": "Sensory",
+                    "children": [
+                        {
+                            "name": "Abdominal aura",
+                            "children": [
+                                {
+                                    "name": "Cephalic to epigastric"
+                                },
+                                {
+                                    "name": "Epigastric to cephalic"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Auditory symptoms",
+                            "children": [
+                                {
+                                    "name": "Acoustic illusion(Palinacousis)"
+                                },
+                                {
+                                    "name": "Deafness"
+                                },
+                                {
+                                    "name": "Elementary acoustic hallucination",
+                                    "criterias": [ "lateralized" ]
+                                },
+                                {
+                                    "name": "Musical hallucianation"
+                                },
+                                {
+                                    "name": "Verbal hallucination"
+                                },
+                                {
+                                    "name": "Verbal illusion(Palinacousis)"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Genital signs"
+                        },
+                        {
+                            "name": "Gustatory",
+                            "children": [
+                                {
+                                    "name": "Hallucination"
+                                },
+                                {
+                                    "name": "Illusion"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Headache",
+                            "children": [
+                                {
+                                    "name": "ictal"
+                                },
+                                {
+                                    "name": "Post-ictal"
+                                },
+                                {
+                                    "name": "Pre-ictal"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Olfactory",
+                            "children": [
+                                {
+                                    "name": "Hallucination",
+                                    "children": [
+                                        {
+                                            "name": "Memory-related"
+                                        },
+                                        {
+                                            "name": "Pleasant"
+                                        },
+                                        {
+                                            "name": "Unpleaseant"
+                                        },
+                                        {
+                                            "name": "Unrelated"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "Illusion"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Postictal somato-sensory deficits",
+                            "criterias": [ "topography", "lateralized" ]
+                        },
+                        {
+                            "name": "Somatosensory symptoms",
+                            "criterias": [ "topography", "lateralized" ],
+                            "children": [
+                                {
+                                    "name": "pain"
+                                },
+                                {
+                                    "name": "Tactile senstaions"
+                                },
+                                {
+                                    "name": "Tinglings"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Urinary sensations",
+                            "criterias": [ "topography", "lateralized" ]
+                        },
+                        {
+                            "name": "Vestibular symptoms",
+                            "children": [
+                                {
+                                    "name": "Lateral thrust"
+                                },
+                                {
+                                    "name": "Rotating vertigo",
+                                    "criterias": [ "lateralized" ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Visual",
+                            "children": [
+                                {
+                                    "name": "Complex visual halluciantion",
+                                    "children": [
+                                        {
+                                            "name": "Memory-related"
+                                        },
+                                        {
+                                            "name": "Pleasant"
+                                        },
+                                        {
+                                            "name": "Unpleaseant"
+                                        },
+                                        {
+                                            "name": "Unrelated",
+                                            "criterias": [ "lateralized" ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "Elementary visual hallucination"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Cognitive",
+                    "children": [
+                        {
+                            "name": "Affective symptoms",
+                            "children": [
+                                {
+                                    "name": "Anger"
+                                },
+                                {
+                                    "name": "Anxiety"
+                                },
+                                {
+                                    "name": "Fear"
+                                },
+                                {
+                                    "name": "Guilt"
+                                },
+                                {
+                                    "name": "Sadness"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Depersonalization"
+                        },
+                        {
+                            "name": "Ecstatic and mystic feeling, bliss"
+                        },
+                        {
+                            "name": "Forced thinking"
+                        },
+                        {
+                            "name": "Heautoscopy"
+                        },
+                        {
+                            "name": "Loss of awareness"
+                        },
+                        {
+                            "name": "Mnesic symptoms",
+                            "children": [
+                                {
+                                    "name": "D\u00e9j\u00e0-v\u00e9cu"
+                                },
+                                {
+                                    "name": "D\u00e9j\u00e0-vu"
+                                },
+                                {
+                                    "name": "Dreamy state"
+                                },
+                                {
+                                    "name": "Reminiscence",
+                                    "children": [
+                                        {
+                                            "name": "Predominantly auditivo-verbal"
+                                        },
+                                        {
+                                            "name": "Predominantly emotional"
+                                        },
+                                        {
+                                            "name": "Predominantly visual"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Out-of-body experience"
+                        },
+                        {
+                            "name": "Sexual arousal"
+                        }
+                    ]
+                },
+                {
+                    "name": "other"
+                },
+                {
+                    "name": "Autonomic",
+                    "children": [
+                        {
+                            "name": "Urination"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Objective",
+            "children": [
+                {
+                    "name": "Speech",
+                    "children": [
+                        {
+                            "name": "Aphasia",
+                            "children": [
+                                {
+                                    "name": "Comprehension"
+                                },
+                                {
+                                    "name": "Global"
+                                },
+                                {
+                                    "name": "Production"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Dysarthria"
+                        }
+                    ]
+                },
+                {
+                    "name": "Autonomic",
+                    "children": [
+                        {
+                            "name": "Apnea"
+                        },
+                        {
+                            "name": "Cardiovascular manifestations",
+                            "children": [
+                                {
+                                    "name": "Bradycardia"
+                                },
+                                {
+                                    "name": "Ictal asystolia"
+                                },
+                                {
+                                    "name": "Tachycardia"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Choking"
+                        },
+                        {
+                            "name": "Crying"
+                        },
+                        {
+                            "name": "Cutaneous Ictal Phenomena",
+                            "children": [
+                                {
+                                    "name": "Flushing"
+                                },
+                                {
+                                    "name": "Pallor"
+                                },
+                                {
+                                    "name": "Piloerection"
+                                },
+                                {
+                                    "name": "sweating"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Hypersalivation"
+                        },
+                        {
+                            "name": "Hyperventilation"
+                        },
+                        {
+                            "name": "Hypoventilation"
+                        },
+                        {
+                            "name": "Laughter"
+                        },
+                        {
+                            "name": "Miosis",
+                            "criterias": [ "lateralized" ]
+                        },
+                        {
+                            "name": "Mydriasis",
+                            "criterias": [ "lateralized" ]
+                        },
+                        {
+                            "name": "Sialorrhea"
+                        },
+                        {
+                            "name": "Spitting"
+                        },
+                        {
+                            "name": "Vomiting"
+                        }
+                    ]
+                },
+                {
+                    "name": "Motor",
+                    "children": [
+                        {
+                            "name": "Astasia"
+                        },
+                        {
+                            "name": "Ataxia",
+                            "criterias": [ "topography", "lateralized" ]
+                        },
+                        {
+                            "name": "Blinking (Eye)",
+                            "criterias": [ "lateralized" ]
+                        },
+                        {
+                            "name": "Chapeau de gendarme "
+                        },
+                        {
+                            "name": "Dystonia, Posturing, Tonic",
+                            "criterias": [ "topography", "lateralized" ]
+                        },
+                        {
+                            "name": "Fencing posture (side of the arm extension)",
+                            "criterias": [ "lateralized" ]
+                        },
+                        {
+                            "name": "Gestural automatisms",
+                            "children": [
+                                {
+                                    "name": "Goal-targeted",
+                                    "criterias": [ "topography", "lateralized" ]
+                                },
+                                {
+                                    "name": "Oriented",
+                                    "criterias": [ "lateralized" ]
+                                },
+                                {
+                                    "name": "Unoriented",
+                                    "criterias": [ "lateralized" ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Hyperkinetic behaviors",
+                            "criterias": [ "topography", "lateralized" ],
+                            "children": [
+                                {
+                                    "name": "Goal-targeted"
+                                },
+                                {
+                                    "name": "Oriented"
+                                },
+                                {
+                                    "name": "Unoriented"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Mimic automatisms"
+                        },
+                        {
+                            "name": "Negative myoclonus",
+                            "criterias": [ "topography", "lateralized" ]
+                        },
+                        {
+                            "name": "Nose wiping"
+                        },
+                        {
+                            "name": "Nystagmus"
+                        },
+                        {
+                            "name": "Orientation",
+                            "criterias": [ "topography", "lateralized" ]
+                        },
+                        {
+                            "name": "Oroalimentary automatisms ",
+                            "criterias": [ "lateralized" ]
+                        },
+                        {
+                            "name": "Paresis, Plegic, Atonic",
+                            "criterias": [ "topography", "lateralized" ]
+                        },
+                        {
+                            "name": "Positive Myoclonus",
+                            "criterias": [ "topography", "lateralized" ]
+                        },
+                        {
+                            "name": "Spasms"
+                        },
+                        {
+                            "name": "Version",
+                            "criterias": [ "topography", "lateralized" ]
+                        },
+                        {
+                            "name": "Vocal automatisms",
+                            "children": [
+                                {
+                                    "name": "Humming"
+                                },
+                                {
+                                    "name": "Singing"
+                                },
+                                {
+                                    "name": "Verbal automatisms"
+                                },
+                                {
+                                    "name": "Vocal automatisms"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Cognitive",
+                    "children": [
+                        {
+                            "name": "Hypovigilance"
+                        }
+                    ]
+                },
+                {
+                    "name": "ohter"
+                }
+            ]
+        }
+    ]
+}
