@@ -15,5 +15,7 @@
     "symptom_tree": "Symptoms",
     "toolbar_pause": "Pause",
     "toolbar_play": "Play",
-    "window_add_symptom": "Add a new symptom"
+    "window_add_symptom": "Add a new symptom",
+    "tab_objective": "Objective",
+    "tab_subjective": "Subjective"
 }

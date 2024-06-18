@@ -13,6 +13,7 @@ def test_deserialize():
     assert attribute.name == "abc"
     assert attribute.type == AttributeType.EXCLUSIVE
     assert attribute.values == [ "a", "b" ]
+    assert attribute.selection == [ ]
 
 def test_missing_name():
     with pytest.raises(schema.SchemaMissingKeyError):

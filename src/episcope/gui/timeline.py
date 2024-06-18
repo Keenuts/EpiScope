@@ -114,18 +114,14 @@ class TimelineBlock(TimelineElement):
     FONT = QFont(DEFAULT_FONT_NAME, DEFAULT_FONT_SIZE)
     FONT_METRIC = QFontMetrics(FONT)
 
-    def __init__(self, symptom, criterias, x, width, *kargs, **kwargs):
+    def __init__(self, symptom, x, width, *kargs, **kwargs):
         super().__init__(x, LINE_START_PX, width, LINE_HEIGHT_PX, *kargs, **kwargs)
         self._line = 0
         self._symptom = symptom
-        self._criterias = criterias
         self._computeText()
 
     def symptom(self : Self) -> Symptom:
         return self._symptom
-
-    def criterias(self : Self) -> list[Attribute]:
-        return self._criterias
 
     def _onSizeChanged(self : Self) -> None:
         self._computeText()
@@ -161,16 +157,8 @@ class TimelineBlock(TimelineElement):
         if letter_count < 3:
             return
 
-        path = self._symptom.path().split('/')
-        text : list[str] = []
-        while letter_count > 3 and len(path) > 0:
-            item = path[-1]
-            path = path[0:-1]
-            if len(item) > letter_count:
-                break
-            text.insert(0, item)
-            letter_count -= len(item) + 1
-        self._text = "/".join(text)
+        name = self._symptom.name
+        self._text = name[:min(letter_count, len(name))]
         self._textWidth = self.FONT_METRIC.horizontalAdvance(self._text)
 
     def _drawHandle(self, painter, x):
@@ -358,7 +346,6 @@ class DragState():
 
 class TimelineScene(QGraphicsScene):
     on_seek = Signal(int)
-    on_block_creation_request = Signal(int)
 
     def __init__(self, *kargs, **kwargs):
         super().__init__(*kargs, **kwargs)
@@ -380,7 +367,7 @@ class TimelineScene(QGraphicsScene):
         timeline = Timeline()
         for line in self._lines:
             for item in line:
-                timeline.addSymptom(item.symptom(), item.criterias(), int(item.rawX()), int(item.rawX() + item.rawWidth()))
+                timeline.addSymptom(item.symptom(), int(item.rawX()), int(item.rawX() + item.rawWidth()))
         return timeline
 
     def getTimelineDuration(self : Self) -> int:
@@ -552,14 +539,10 @@ class TimelineScene(QGraphicsScene):
         widget = self.views()[0]
         popupMenu = QMenu(I18N("edit"), widget)
 
-        if block is None:
-            action = QAction(I18N("add"), widget)
-            time = self._pixelToTime(event.scenePos().x())
-            action.triggered.connect(lambda: self.on_block_creation_request.emit(time))
-        else:
+        if block is not None:
             action = QAction(I18N("delete"), widget)
             action.triggered.connect(lambda: self.removeBlock(block))
-        popupMenu.addAction(action)
+            popupMenu.addAction(action)
 
         popupMenu.popup(event.screenPos())
         event.accept()
@@ -760,7 +743,6 @@ class TimelineView(QGraphicsView):
 
 class TimelineWidget(QWidget):
     on_seek = Signal(int)
-    on_block_creation_request = Signal(int)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -771,9 +753,7 @@ class TimelineWidget(QWidget):
         layout = QVBoxLayout()
         layout.addWidget(timeline)
         self.setLayout(layout)
-
         self._scene.on_seek.connect(lambda x: self.on_seek.emit(x))
-        self._scene.on_block_creation_request.connect(lambda x: self.on_block_creation_request.emit(x))
 
     def updateCursorPosition(self, position):
         self._scene.updateCursorPosition(position)
@@ -784,14 +764,15 @@ class TimelineWidget(QWidget):
     def cursorTime(self : Self) -> int:
         return self._scene.cursorPosition()
 
-    def addSymptomAtTime(self : Self, time : int, symptom : Symptom, criterias : list[Attribute]):
+    def addSymptomAtTime(self : Self, time : int, symptom : Symptom):
+        assert symptom.isInstance()
         duration = self._scene.defaultBlockDuration()
-        self._scene.addBlock(TimelineBlock(symptom, criterias, time, duration))
+        self._scene.addBlock(TimelineBlock(symptom, time, duration))
 
     def setTimeline(self : Self, timeline : Timeline):
         self._scene.reset()
         for item in timeline.getSymptoms():
-            self._scene.addBlock(TimelineBlock(item.symptom, item.criterias, item.start, item.duration))
+            self._scene.addBlock(TimelineBlock(item.symptom, item.start, item.duration))
 
     def getTimeline(self : Self) -> Timeline:
         return self._scene.getTimeline()

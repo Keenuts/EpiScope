@@ -13,7 +13,6 @@ class BlockType(Enum):
 class TimelineItem:
     identifier : int
     symptom : Symptom
-    criterias : list[Attribute]
     start : int
     duration : int
 
@@ -44,9 +43,10 @@ class Timeline():
             output.append(item)
         return output
 
-    def addSymptom(self : Self, symptom : Symptom, criterias : list[Attribute], start : int, end : int) -> int:
+    def addSymptom(self : Self, symptom : Symptom, start : int, end : int) -> int:
+        assert symptom.isInstance()
         identifier = self._allocateId()
-        self._symptoms[identifier] = TimelineItem(identifier, symptom, criterias, start, end - start)
+        self._symptoms[identifier] = TimelineItem(identifier, symptom, start, end - start)
         self._timeline.append(identifier)
         self._updateTimeline()
         return identifier
@@ -98,8 +98,7 @@ class Timeline():
         output = []
         for item in self.getSymptoms():
             output.append({
-                'name': item.symptom.path(),
-                'criterias': item.criterias,
+                'symptom': item.symptom.serialize(),
                 'start': int(item.start),
                 'end': int(item.start + item.duration)
             })

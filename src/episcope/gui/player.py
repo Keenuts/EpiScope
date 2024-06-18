@@ -9,7 +9,9 @@ from PySide6.QtWidgets import (QDialog,
                                QToolBar,
                                QHBoxLayout,
                                QVBoxLayout,
-                               QWidget)
+                               QGroupBox,
+                               QWidget,
+                               QSizePolicy)
 from PySide6.QtMultimedia import QAudioOutput, QMediaFormat, QMediaPlayer
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from typing import Self, Optional
@@ -18,7 +20,7 @@ import sys
 import json
 from episcope.localization import I18N
 from episcope.core import Timeline, Symptom, SymptomCategory, SymptomDB, Attribute
-from episcope.gui import TimelineWidget, SymptomPickerDialog
+from episcope.gui import TimelineWidget, SymptomPickerDialog, SymptomPicker
 
 AVI = "video/x-msvideo"  # AVI
 MP4 = 'video/mp4'
@@ -73,14 +75,12 @@ class ToolbarWidget(QWidget):
 
 
 class MainWidget(QWidget):
-    on_block_creation_request = Signal(int)
-
-    def __init__(self : Self, *args, **kwargs) -> None:
+    def __init__(self : Self, symptoms : SymptomDB, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        self._symptoms = symptoms
 
         self._timelineWidget = TimelineWidget()
         self._timelineWidget.on_seek.connect(self._player_seek)
-        self._timelineWidget.on_block_creation_request.connect(lambda x: self.on_block_creation_request.emit(x))
 
         video = QVideoWidget()
         audio_output = QAudioOutput()
@@ -94,6 +94,7 @@ class MainWidget(QWidget):
         self._media_url = None
 
         vsplit = QSplitter(Qt.Vertical)
+        vsplit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         vsplit.addWidget(video)
 
 
@@ -108,13 +109,23 @@ class MainWidget(QWidget):
         vsplit.setStretchFactor(1, 1)
         vsplit.setStretchFactor(2, 3)
 
-        vbox = QVBoxLayout(self)
-        vbox.addWidget(vsplit)
-        self.setLayout(vbox)
+        hsplit = QHBoxLayout()
+        picker_list = SymptomPicker(self._symptoms)
+        picker_list.on_create_symptom.connect(lambda symptom: self._onCreateSymptom(symptom))
+        hsplit.addWidget(picker_list)
+        hsplit.addWidget(vsplit)
+        self.setLayout(hsplit)
 
     @Slot(QMediaPlayer.PlaybackState)
     def _update_toolbar(self, state):
         self._toolbar.setPlaying(state == QMediaPlayer.PlayingState)
+
+    @Slot(Symptom)
+    def _onCreateSymptom(self : Self, symptom_model : Symptom) -> None:
+        dialog = SymptomPickerDialog(self._symptoms, symptom_model)
+        if not dialog.exec():
+            return None
+        self.addSymptomAtCursor(dialog.symptom())
 
     def _player_seek(self, position):
         self._player.setPosition(position)
@@ -144,11 +155,12 @@ class MainWidget(QWidget):
     def setTimeline(self : Self, timeline : Timeline) -> None:
         self._timelineWidget.setTimeline(timeline)
 
-    def addSymptomAtTime(self : Self, time : int, symptom : Symptom, criterias : list[Attribute]):
-        self._timelineWidget.addSymptomAtTime(time, symptom, criterias)
+    def setSymptomsDB(self : Self, database : SymptomDB) -> None:
+        self._symptoms = database
 
-    def addSymptomAtCursor(self : Self, symptom : Symptom, criterias : list[Attribute]):
-        self.addSymptomAtTime(self._timelineWidget.cursorTime(), symptom, criterias)
+    def addSymptomAtCursor(self : Self, symptom : Symptom):
+        symptom.isInstance()
+        self._timelineWidget.addSymptomAtTime(self._timelineWidget.cursorTime(), symptom)
 
     def export(self : Self) -> Timeline:
         return self._timelineWidget.getTimeline()
@@ -178,7 +190,6 @@ class Player(QMainWindow):
 
     def initialize_menu_file(self):
         file_menu = self.menuBar().addMenu(I18N("menu_files"))
-        symptom_menu = self.menuBar().addMenu(I18N("menu_symptoms"))
 
         action_new  = QAction(I18N("menu_files_new"),
                              self,
@@ -207,30 +218,16 @@ class Player(QMainWindow):
         file_menu.addAction(action_import_timeline)
         file_menu.addAction(action_exit)
 
-        action_add_symptom = QAction(I18N("menu_symptoms_add"),
-                              self,
-                              shortcut=QKeySequence(Qt.Key_S),
-                              triggered=self.action_add_symptom)
-        symptom_menu.addAction(action_add_symptom)
-
-        self._player = MainWidget()
-        self._player.on_block_creation_request.connect(self._onBlockCreationRequest)
+        self._loadSymptoms("symptoms.json")
+        self._player = MainWidget(self._symptoms)
         self.setCentralWidget(self._player)
 
-        self._loadSymptoms("symptoms.json")
         #self._loadTimeline("/home/nathan/test.json")
 
     def _loadSymptoms(self : Self, filename : str) -> None:
         with open(filename, "r") as f:
             data = json.loads(f.read())
-
         self._symptoms = SymptomDB.deserialize(data)
-
-        #self._symptoms = Symptom.loadHierarchy(root)
-        #self._criterias = {}
-        #for item in data['criterias']:
-        #    criteria = Attribute.deserialize(item)
-        #    self._criterias[criteria.name] = criteria
 
     def _loadTimeline(self : Self, filename : str) -> None:
         with open(filename, "r") as f:
@@ -238,10 +235,9 @@ class Player(QMainWindow):
 
         timeline = Timeline()
         for item in data:
-            symptom = self._symptoms.fromPath(item["name"])
+            symptom = self._symptoms.fromPath(item["symptom"]["path"], item["symptom"]['attributes'])
             assert symptom is not None
-            criterias = item['criterias']
-            timeline.addSymptom(symptom, criterias, item['start'], item['end'])
+            timeline.addSymptom(symptom, item['start'], item['end'])
         self._player.setTimeline(timeline)
 
     def action_reset(self : Self):
@@ -281,25 +277,6 @@ class Player(QMainWindow):
             return
         self._default_location = dialog.directory().absolutePath()
         self._loadTimeline(dialog.selectedFiles()[0])
-
-    def _doSymptomCreation(self : Self):
-        dialog = SymptomPickerDialog(self._symptoms, [ self._criterias[key] for key in self._criterias ])
-        if not dialog.exec():
-            return None
-        return dialog.selection()
-
-    def _onBlockCreationRequest(self : Self, time : int) -> None:
-        result = self._doSymptomCreation()
-        if not result:
-            return
-        self._player.addSymptomAtTime(time, result['symptom'], result['criterias'])
-
-
-    def action_add_symptom(self):
-        result = self._doSymptomCreation()
-        if not result:
-            return
-        self._player.addSymptomAtCursor(result['symptom'], result['criterias'])
 
     def action_exit(self):
         del self._player
