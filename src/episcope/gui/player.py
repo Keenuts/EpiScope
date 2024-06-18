@@ -22,10 +22,12 @@ from episcope.gui import TimelineWidget, SymptomPickerDialog
 
 AVI = "video/x-msvideo"  # AVI
 MP4 = 'video/mp4'
+MPEG = 'video/mpeg'
 MKV = 'video/x-matroska'
 WEBM = 'video/webm'
 QUICKTIME = 'video/quicktime'
-WANTED_VIDEO_MIME_TYPES = [ MKV, MP4, AVI, WEBM, QUICKTIME ]
+
+WANTED_VIDEO_MIME_TYPES = [ MP4, AVI, MPEG, MKV, WEBM, QUICKTIME ]
 JSON_MIME_TYPES = [ 'application/json' ]
 
 class ToolbarWidget(QWidget):
