@@ -17,7 +17,7 @@ from typing import Self, Optional
 import sys
 import json
 from episcope.localization import I18N
-from episcope.core import Timeline, Symptom, Criteria
+from episcope.core import Timeline, Symptom, SymptomCategory, SymptomDB, Attribute
 from episcope.gui import TimelineWidget, SymptomPickerDialog
 
 AVI = "video/x-msvideo"  # AVI
@@ -144,10 +144,10 @@ class MainWidget(QWidget):
     def setTimeline(self : Self, timeline : Timeline) -> None:
         self._timelineWidget.setTimeline(timeline)
 
-    def addSymptomAtTime(self : Self, time : int, symptom : Symptom, criterias : list[Criteria]):
+    def addSymptomAtTime(self : Self, time : int, symptom : Symptom, criterias : list[Attribute]):
         self._timelineWidget.addSymptomAtTime(time, symptom, criterias)
 
-    def addSymptomAtCursor(self : Self, symptom : Symptom, criterias : list[Criteria]):
+    def addSymptomAtCursor(self : Self, symptom : Symptom, criterias : list[Attribute]):
         self.addSymptomAtTime(self._timelineWidget.cursorTime(), symptom, criterias)
 
     def export(self : Self) -> Timeline:
@@ -224,16 +224,13 @@ class Player(QMainWindow):
         with open(filename, "r") as f:
             data = json.loads(f.read())
 
-        root = {
-                "name": I18N("symptom_tree"),
-                "children": data['symptoms']
-        }
+        self._symptoms = SymptomDB.deserialize(data)
 
-        self._symptoms = Symptom.loadHierarchy(root)
-        self._criterias = {}
-        for item in data['criterias']:
-            criteria = Criteria.fromJSON(item)
-            self._criterias[criteria.name] = criteria
+        #self._symptoms = Symptom.loadHierarchy(root)
+        #self._criterias = {}
+        #for item in data['criterias']:
+        #    criteria = Attribute.deserialize(item)
+        #    self._criterias[criteria.name] = criteria
 
     def _loadTimeline(self : Self, filename : str) -> None:
         with open(filename, "r") as f:

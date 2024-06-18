@@ -3,7 +3,7 @@ import json
 from typing import Self, Optional
 from dataclasses import dataclass
 
-from episcope.core import Symptom, Criteria
+from episcope.core import Symptom, Attribute
 
 class BlockType(Enum):
     SPACER = 0,
@@ -13,7 +13,7 @@ class BlockType(Enum):
 class TimelineItem:
     identifier : int
     symptom : Symptom
-    criterias : list[Criteria]
+    criterias : list[Attribute]
     start : int
     duration : int
 
@@ -44,7 +44,7 @@ class Timeline():
             output.append(item)
         return output
 
-    def addSymptom(self : Self, symptom : Symptom, criterias : list[Criteria], start : int, end : int) -> int:
+    def addSymptom(self : Self, symptom : Symptom, criterias : list[Attribute], start : int, end : int) -> int:
         identifier = self._allocateId()
         self._symptoms[identifier] = TimelineItem(identifier, symptom, criterias, start, end - start)
         self._timeline.append(identifier)

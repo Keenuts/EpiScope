@@ -1,99 +1,79 @@
-import json
-from enum import Enum
-from typing import Self, Optional
-from dataclasses import dataclass
+from __future__ import annotations
 
-class CriteriaType(Enum):
-    EXCLUSIVE = 1
-    MIX = 2
+from dataclasses import dataclass
+from enum import Enum
+from typing import Self
+from schema import Schema, Optional, SchemaError
+
+import json
+
+from episcope.core import Attribute, AttributeType
 
 @dataclass
-class Criteria:
+class Symptom:
     name : str
-    type : CriteriaType
-    values : list[str]
+    attributes : list[Attribute]
+    category : SymptomCategory
 
     @staticmethod
-    def fromJSON(data : dict):
-        return Criteria(data['name'], CriteriaType[data['type'].upper()], data['values'])
+    def deserialize(global_attributes : dict[Attribute], data : dict):
+        try:
+            data = Symptom.validateSchema(data)
+            custom_attributes = [ Attribute.deserialize(x) for x in data['custom_attributes'] ]
+            custom_attribute_names = set([ x.name for x in custom_attributes])
+            global_attribute_names = set([ x for x in global_attributes])
+            if len(custom_attribute_names) != len(custom_attributes) or \
+                    len(global_attribute_names.intersection(custom_attribute_names)) != 0:
+                raise ValueError("Duplicate name for custom attributes.")
 
-class Symptom:
-    def __init__(self : Self, name : str, criterias : list, parent : Optional[Self] = None) -> None:
-        self._parent = parent
+            attributes = [ global_attributes[x] for x in data['attributes'] ]
+        except (SchemaError, ValueError) as e:
+            e.add_note('Parsed item was:\n{}'.format(json.dumps(data, indent=4)))
+            raise
+        return Symptom(data['name'], attributes + custom_attributes, None)
+
+    @staticmethod
+    def validateSchema(data : dict):
+        schema = Schema({
+                'name': str,
+                Optional('custom_attributes', default=[]): [ dict ],
+                Optional('attributes', default=[]): [ str ],
+        })
+        return schema.validate(data)
+
+class SymptomCategory:
+    def __init__(self : Self, name : str):
         self._name = name
-        self._criterias = criterias
-        self._children : list[Self] = []
+        self._children = []
 
-    # Add a child to this node.
-    def appendChild(self : Self, item : Self) -> None:
-        self._children.append(item)
-
-    # Return this node's child at index "index".
-    def child(self : Self, index : int) -> Self:
-        return self._children[index]
-
-    # Returns the number of direct children this node has (no recursion).
-    def childCount(self : Self) -> int:
-        return len(self._children)
-
-    # Returns the name of this node.
     def name(self : Self) -> str:
         return self._name
 
-    # Returns the list of criterias associated with this node.
-    # If this node has no criterias defined, it inherits its parents'
-    def criterias(self : Self) -> list:
-        if self._criterias is None and self._parent:
-            return self._parent.criterias()
-        return self._criterias
+    def addSymptom(self : Self, symptom : Symptom) -> bool:
+        if len([ x for x in self._children if x.name == symptom.name ]):
+            return False
 
-    # Returns the parent of this node, None if this node is the root.
-    def parent(self : Self) -> Optional[Self]:
-        return self._parent
+        symptom.category = self
+        self._children.append(symptom)
+        return True
 
-    # Returns the absolute path from the root to this node.
-    # Used for auto-completion.
-    def path(self : Self) -> str:
-        if self._parent is None:
-            return ""
-        parentPath = self._parent.path()
-        if len(parentPath) == 0:
-            return self._name
-        return "{}/{}".format(self._parent.path(), self._name)
-
-    # Returns the child node matching the given path if any.
-    # None otherwise.
-    # This function assumes there is a unique path for each node.
-    def fromPath(self : Self, path : str) -> Optional[Self]:
-        if len(path) == 0:
-            return self
-
-        parts = path.split("/")
-        for child in self._children:
-            if child.name().lower() != parts[0].lower():
-                continue
-            return child.fromPath("/".join(parts[1:]))
-        return None
-
-    # Used for Qt models: the row is the index of this node in the parents'
-    # children.
-    def row(self : Self) -> int:
-        if self._parent:
-            return self._parent._children.index(self)
-        return 0
-
-    # Loads a symptom hierarchy from a JSON dictionnary.
     @staticmethod
-    def loadHierarchy(data : dict, parent = None):
-        if 'criterias' not in data:
-            criterias = [] if parent is None else parent.criterias()
-        else:
-            criterias = data['criterias']
+    def deserialize(attributes : list[Attribute], data : dict):
+        try:
+            data = SymptomCategory.validateSchema(data)
+        except SchemaError as e:
+            e.add_note('Parsed item was:\n{}'.format(json.dumps(data, indent=4)))
+            raise
 
-        node = Symptom(data['name'], criterias, parent)
-        if 'children' not in data:
-            return node
+        output = SymptomCategory(data['name'])
+        for child in data['children']:
+            output.addSymptom(Symptom.deserialize(attributes, child))
+        return output
 
-        for item in data['children']:
-            node.appendChild(Symptom.loadHierarchy(item, node))
-        return node
+    @staticmethod
+    def validateSchema(data : dict):
+        schema = Schema({
+                'name': str,
+                'children': [ dict ]
+        })
+        return schema.validate(data)

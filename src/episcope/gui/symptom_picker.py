@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (QAbstractItemView,
                                QWidget)
 
 from episcope.localization import I18N
-from episcope.core import Symptom, Criteria, CriteriaType
+from episcope.core import Symptom, Attribute, AttributeType
 
 class TreeComboBox(QComboBox):
     def __init__(self, *args):
@@ -108,7 +108,7 @@ class MyCompleter(QCompleter):
 class CriteriaWidget(QWidget):
     def __init__(self, criteria, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        assert type(criteria) is Criteria
+        assert type(criteria) is Attribute
 
         self._criteria = criteria
         self._layout = QVBoxLayout()
@@ -148,7 +148,7 @@ class MixPicker(CriteriaWidget):
             self._addOption(QCheckBox(option, self))
 
 class SymptomPickerDialog(QDialog):
-    def __init__(self, symptoms : Symptom, criterias : list[Criteria]):
+    def __init__(self, symptoms : Symptom, criterias : list[Attribute]):
         super().__init__()
 
         self.setWindowTitle(I18N("window_add_symptom"))
@@ -171,7 +171,7 @@ class SymptomPickerDialog(QDialog):
         self._criterias = []
         widget : Union[ExclusivePicker, MixPicker]
         for item in criterias:
-            if item.type == CriteriaType.EXCLUSIVE:
+            if item.type == AttributeType.EXCLUSIVE:
                 widget = ExclusivePicker(item)
             else:
                 widget = MixPicker(item)

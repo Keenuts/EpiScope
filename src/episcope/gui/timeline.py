@@ -11,7 +11,7 @@ from PySide6.QtGui import QPainter, QFont, QBrush, QColor, QFontMetrics, QPen, Q
 from typing import Self, Optional
 
 from episcope.localization import I18N
-from episcope.core import Timeline, Symptom, Criteria
+from episcope.core import Timeline, Symptom, Attribute
 
 # The maximum level of zoom (zoom in).
 MAX_ZOOM_UNIT = 0.3
@@ -124,7 +124,7 @@ class TimelineBlock(TimelineElement):
     def symptom(self : Self) -> Symptom:
         return self._symptom
 
-    def criterias(self : Self) -> list[Criteria]:
+    def criterias(self : Self) -> list[Attribute]:
         return self._criterias
 
     def _onSizeChanged(self : Self) -> None:
@@ -784,7 +784,7 @@ class TimelineWidget(QWidget):
     def cursorTime(self : Self) -> int:
         return self._scene.cursorPosition()
 
-    def addSymptomAtTime(self : Self, time : int, symptom : Symptom, criterias : list[Criteria]):
+    def addSymptomAtTime(self : Self, time : int, symptom : Symptom, criterias : list[Attribute]):
         duration = self._scene.defaultBlockDuration()
         self._scene.addBlock(TimelineBlock(symptom, criterias, time, duration))
 
