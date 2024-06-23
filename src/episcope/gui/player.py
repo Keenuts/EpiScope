@@ -73,6 +73,14 @@ class ToolbarWidget(QWidget):
         seconds = seconds % 60
         self._time.setText("{:02}:{:02}:{:02}".format(hours, minutes, seconds))
 
+class ClickableVideoWidget(QVideoWidget):
+    clicked = Signal()
+
+    def __init__(self : Self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+    def mousePressEvent(self, event):
+        self.clicked.emit()
 
 class MainWidget(QWidget):
     def __init__(self : Self, symptoms : SymptomDB, *args, **kwargs) -> None:
@@ -82,7 +90,8 @@ class MainWidget(QWidget):
         self._timelineWidget = TimelineWidget()
         self._timelineWidget.on_seek.connect(self._player_seek)
 
-        video = QVideoWidget()
+        video = ClickableVideoWidget()
+        video.clicked.connect(self._togglePlayPause)
         audio_output = QAudioOutput()
         self._player = QMediaPlayer()
         self._player.setAudioOutput(audio_output)
@@ -126,6 +135,13 @@ class MainWidget(QWidget):
         if not dialog.exec():
             return None
         self.addSymptomAtCursor(dialog.symptom())
+
+    @Slot()
+    def _togglePlayPause(self : Self) -> None:
+        if self._player.isPlaying():
+            self._player.pause()
+        else:
+            self._player.play()
 
     def _player_seek(self, position):
         self._player.setPosition(position)
