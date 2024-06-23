@@ -93,9 +93,9 @@ class MainWidget(QWidget):
 
         video = ClickableVideoWidget()
         video.clicked.connect(self._togglePlayPause)
-        audio_output = QAudioOutput()
+        self._audio_output = QAudioOutput()
         self._player = QMediaPlayer()
-        self._player.setAudioOutput(audio_output)
+        self._player.setAudioOutput(self._audio_output)
         self._player.errorOccurred.connect(self._player_error)
         self._player.playbackStateChanged.connect(self._update_toolbar)
         self._player.setVideoOutput(video)
