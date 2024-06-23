@@ -393,15 +393,27 @@ class TimelineScene(QGraphicsScene):
         self._redrawScene()
 
     def onWindowResize(self, width, height):
+        unit = self._unit
+        if int(self._windowWidth) != 0 and int(width) != 0:
+            if width > self._windowWidth:
+                unit = self._unit * (width / self._windowWidth)
+            else:
+                unit = self._unit / (self._windowWidth / width)
+
         self._windowWidth = width
         self._windowHeight = height
         self._computeSceneRect()
+        self.setUnit(unit)
 
     def _onLineCountChange(self : Self):
         self._computeSceneRect()
 
     def _minUnit(self : Self) -> None:
-        max_time = self.getTimelineDuration() * 2
+        if self._media_duration:
+            max_time = self._media_duration
+        else:
+            max_time = self.getTimelineDuration() * 2
+
         if max_time < 1:
             return DEFAULT_ZOOM_UNIT
 
@@ -446,7 +458,8 @@ class TimelineScene(QGraphicsScene):
         self.invalidate()
 
     def defaultBlockDuration(self : Self) -> int:
-        return self._pixelToTime(self._windowWidth / 4) - self._pixelToTime(0)
+        # Change default block duration to 30s.
+        return 30 * 1000
 
     def drawBackground(self, painter, rect):
         self._background.paint(painter, QStyleOptionGraphicsItem())
@@ -481,6 +494,7 @@ class TimelineScene(QGraphicsScene):
 
     # Add a block to the timeline.
     def addBlock(self, block):
+        block.setUnit(self._unit)
         self.addItem(block)
         for i in range(len(self._lines) + 1):
             if self._addBlockToLine(block, i):
@@ -525,6 +539,9 @@ class TimelineScene(QGraphicsScene):
     def updateMediaDuration(self, duration):
         self._media_duration = duration
         self._background.setMediaDuration(duration)
+
+        self.setUnit(self._minUnit())
+        self.setOffset(0)
 
     def _handleLeftClick(self : Self, event : QGraphicsSceneMouseEvent) -> None:
         if self._cursor.intersects(event.scenePos().x(), event.scenePos().y()):
