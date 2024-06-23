@@ -346,6 +346,7 @@ class DragState():
 
 class TimelineScene(QGraphicsScene):
     on_seek = Signal(int)
+    on_symptom_edit = Signal(Symptom)
 
     def __init__(self, *kargs, **kwargs):
         super().__init__(*kargs, **kwargs)
@@ -540,9 +541,13 @@ class TimelineScene(QGraphicsScene):
         popupMenu = QMenu(I18N("edit"), widget)
 
         if block is not None:
-            action = QAction(I18N("delete"), widget)
-            action.triggered.connect(lambda: self.removeBlock(block))
-            popupMenu.addAction(action)
+            delete_action = QAction(I18N("delete"), widget)
+            delete_action.triggered.connect(lambda: self.removeBlock(block))
+            popupMenu.addAction(delete_action)
+
+            edit_action = QAction(I18N("edit"), widget)
+            edit_action.triggered.connect(lambda: self.on_symptom_edit.emit(block.symptom()))
+            popupMenu.addAction(edit_action)
 
         popupMenu.popup(event.screenPos())
         event.accept()
@@ -743,6 +748,7 @@ class TimelineView(QGraphicsView):
 
 class TimelineWidget(QWidget):
     on_seek = Signal(int)
+    on_symptom_edit = Signal(Symptom)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -754,6 +760,7 @@ class TimelineWidget(QWidget):
         layout.addWidget(timeline)
         self.setLayout(layout)
         self._scene.on_seek.connect(lambda x: self.on_seek.emit(x))
+        self._scene.on_symptom_edit.connect(lambda x: self.on_symptom_edit.emit(x))
 
     def updateCursorPosition(self, position):
         self._scene.updateCursorPosition(position)

@@ -59,7 +59,7 @@ class SymptomList(QWidget):
         layout.addWidget(scroll)
         self.setLayout(layout)
 
-class SymptomPicker(QWidget):
+class SymptomPickerList(QWidget):
     on_create_symptom = Signal(Symptom)
 
     def __init__(self, symptoms : SymptomDB, *args, **kwargs):

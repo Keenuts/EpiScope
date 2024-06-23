@@ -2,6 +2,7 @@
     "add": "Ajouter",
     "button_cancel": "Annuler",
     "button_create": "Créer",
+    "button_save": "Enregister",
     "delete": "Supprimer",
     "edit": "Editer",
     "menu_files": "Fichiers",
@@ -16,6 +17,7 @@
     "toolbar_pause": "Pause",
     "toolbar_play": "Lecture",
     "window_add_symptom": "Ajouter un nouveau symptome",
+    "window_edit_symptom": "Edition du symptome",
     "tab_objective": "Objectif",
     "tab_subjective": "Subjectif"
 }

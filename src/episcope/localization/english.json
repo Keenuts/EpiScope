@@ -2,6 +2,7 @@
     "add": "Add",
     "button_cancel": "Cancel",
     "button_create": "Create",
+    "button_save": "Save",
     "delete": "Delete",
     "edit": "Edit",
     "menu_files": "Files",
@@ -16,6 +17,7 @@
     "toolbar_pause": "Pause",
     "toolbar_play": "Play",
     "window_add_symptom": "Add a new symptom",
+    "window_edit_symptom": "Edit symptom",
     "tab_objective": "Objective",
     "tab_subjective": "Subjective"
 }

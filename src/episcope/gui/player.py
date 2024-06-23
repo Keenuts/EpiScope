@@ -20,7 +20,7 @@ import sys
 import json
 from episcope.localization import I18N
 from episcope.core import Timeline, Symptom, SymptomCategory, SymptomDB, Attribute
-from episcope.gui import TimelineWidget, SymptomPickerDialog, SymptomPicker
+from episcope.gui import TimelineWidget, AttributeEditor, SymptomPickerList
 
 AVI = "video/x-msvideo"  # AVI
 MP4 = 'video/mp4'
@@ -89,6 +89,7 @@ class MainWidget(QWidget):
 
         self._timelineWidget = TimelineWidget()
         self._timelineWidget.on_seek.connect(self._player_seek)
+        self._timelineWidget.on_symptom_edit.connect(self._onSymptomEdit)
 
         video = ClickableVideoWidget()
         video.clicked.connect(self._togglePlayPause)
@@ -119,7 +120,7 @@ class MainWidget(QWidget):
         vsplit.setStretchFactor(2, 3)
 
         hsplit = QHBoxLayout()
-        picker_list = SymptomPicker(self._symptoms)
+        picker_list = SymptomPickerList(self._symptoms)
         picker_list.on_create_symptom.connect(lambda symptom: self._onCreateSymptom(symptom))
         hsplit.addWidget(picker_list)
         hsplit.addWidget(vsplit)
@@ -131,7 +132,7 @@ class MainWidget(QWidget):
 
     @Slot(Symptom)
     def _onCreateSymptom(self : Self, symptom_model : Symptom) -> None:
-        dialog = SymptomPickerDialog(self._symptoms, symptom_model)
+        dialog = AttributeEditor(self._symptoms, symptom_model, add=True)
         if not dialog.exec():
             return None
         self.addSymptomAtCursor(dialog.symptom())
@@ -145,6 +146,12 @@ class MainWidget(QWidget):
 
     def _player_seek(self, position):
         self._player.setPosition(position)
+
+    def _onSymptomEdit(self : Self, symptom : Symptom) -> None:
+        dialog = AttributeEditor(self._symptoms, symptom, add=False)
+        if not dialog.exec():
+            return None
+        symptom.attributes = dialog.symptom().attributes
 
     def _player_position_changed(self, position):
         self._timelineWidget.updateCursorPosition(position)

@@ -5,71 +5,13 @@ from pytestqt.qt_compat import qt_api
 from PySide6.QtWidgets import QWidget, QPushButton, QTabWidget, QToolButton, QStackedWidget
 
 from episcope.core import SymptomDB, Symptom
-from episcope.gui import SymptomPicker
+from episcope.gui import SymptomPickerList
 from episcope.localization import setLanguage
+from episcope.gui.tests import defaultSymptomDB
 
-def defaultSymptomDB():
-    return SymptomDB.deserialize({
-        "attributes": [
-            {
-                "name": "topography",
-                "type": "mix",
-                "values": [
-                    "head",
-                    "body"
-                ]
-            }
-        ],
-        "objective_symptoms": [
-            {
-                "name": "Sensory",
-                "children": [
-                    {
-                        "name": "Abdominal aura",
-                        "custom_attributes": [
-                            {
-                                "name": "direction",
-                                "type": "exclusive",
-                                "values": [
-                                    "cephalic",
-                                    "epigastric"
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "name": "Deafness",
-                    },
-                ]
-            },
-            {
-                "name": "Cognitive",
-                "children": [
-                    {
-                        "name": "Heautoscopy",
-                        "attributes": { "topography" : None }
-                    },
-                    {
-                        "name": "Forced thinking"
-                    }
-                ]
-            }
-        ],
-        "subjective_symptoms": [
-            {
-                "name": "Autonomic",
-                "children": [
-                    {
-                        "name": "Urination"
-                    }
-                ]
-            }
-        ]
-    })
-
-def create_symptom_list(qtbot) -> SymptomPicker:
+def create_symptom_list(qtbot) -> SymptomPickerList:
     db = defaultSymptomDB()
-    widget = SymptomPicker(db)
+    widget = SymptomPickerList(db)
     qtbot.addWidget(widget)
     widget.show()
     qtbot.waitExposed(widget)
@@ -87,6 +29,7 @@ def test_create(qtbot):
     assert widget.isVisible()
 
 def test_tab_name_french(qtbot):
+    setLanguage("french")
     widget = create_symptom_list(qtbot)
     tabs = widget.findChild(QTabWidget)
     assert tabs is not None

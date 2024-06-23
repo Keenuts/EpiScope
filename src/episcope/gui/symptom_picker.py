@@ -63,6 +63,7 @@ class ExclusivePicker(AttributeWidget):
         for option in attribute.values:
             w = QRadioButton(option, self)
             w.clicked.connect(lambda: self.clicked.emit())
+            w.setChecked(option in attribute.selection)
             self._addOption(w)
 
     @override
@@ -78,17 +79,24 @@ class MixPicker(AttributeWidget):
         for option in attribute.values:
             w = QCheckBox(option, self)
             w.clicked.connect(lambda: self.clicked.emit())
+            w.setChecked(option in attribute.selection)
             self._addOption(w)
 
-class SymptomPickerDialog(QDialog):
-    def __init__(self, database : SymptomDB, model : Symptom):
+class AttributeEditor(QDialog):
+    def __init__(self, database : SymptomDB, model : Symptom, add = True):
         super().__init__()
         self._model = model
 
-        self.setWindowTitle(I18N("window_add_symptom"))
+        if add:
+            self.setWindowTitle(I18N("window_add_symptom"))
+        else:
+            self.setWindowTitle(I18N("window_edit_symptom"))
 
         self._buttonBox = QDialogButtonBox()
-        self._buttonBox.addButton(I18N("button_create"), QDialogButtonBox.AcceptRole)
+        if add:
+            self._buttonBox.addButton(I18N("button_create"), QDialogButtonBox.AcceptRole)
+        else:
+            self._buttonBox.addButton(I18N("button_save"), QDialogButtonBox.AcceptRole)
         self._buttonBox.addButton(I18N("button_cancel"), QDialogButtonBox.RejectRole)
         self._buttonBox.accepted.connect(self.accept)
         self._buttonBox.rejected.connect(self.reject)
