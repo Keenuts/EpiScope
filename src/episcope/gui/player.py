@@ -132,7 +132,7 @@ class MainWidget(QWidget):
 
     @Slot(Symptom)
     def _onCreateSymptom(self : Self, symptom_model : Symptom) -> None:
-        dialog = AttributeEditor(self._symptoms, symptom_model, add=True)
+        dialog = AttributeEditor(self._symptoms, symptom_model)
         if not dialog.exec():
             return None
         self.addSymptomAtCursor(dialog.symptom())
@@ -148,7 +148,7 @@ class MainWidget(QWidget):
         self._player.setPosition(position)
 
     def _onSymptomEdit(self : Self, symptom : Symptom) -> None:
-        dialog = AttributeEditor(self._symptoms, symptom, add=False)
+        dialog = AttributeEditor(self._symptoms, symptom)
         if not dialog.exec():
             return None
         symptom.attributes = dialog.symptom().attributes
@@ -252,13 +252,27 @@ class Player(QMainWindow):
             data = json.loads(f.read())
         self._symptoms = SymptomDB.deserialize(data)
 
+    def _loadSymptom(self : Self, path : str, attributes : dict[str, list[str]]) -> Symptom:
+        model = self._symptoms.fromPath(path)
+        output = model.instantiate()
+
+        for name, values in attributes.items():
+            if name not in model.attributes:
+                raise ValueError(f"Invalid attribute {name!r} for symptom {parts[2]!r}.")
+            for x in values:
+                if x not in model.attributes[name].values:
+                    raise ValueError(f"Invalid attribute value {x!r} for attribute {name!r}.")
+                output.attributes[name].selection.append(x)
+        return output
+
+
     def _loadTimeline(self : Self, filename : str) -> None:
         with open(filename, "r") as f:
             data = json.loads(f.read())
 
         timeline = Timeline()
         for item in data:
-            symptom = self._symptoms.fromPath(item["symptom"]["path"], item["symptom"]['attributes'])
+            symptom = self._loadSymptom(item["symptom"]["path"], item["symptom"]['attributes'])
             assert symptom is not None
             timeline.addSymptom(symptom, item['start'], item['end'])
         self._player.setTimeline(timeline)

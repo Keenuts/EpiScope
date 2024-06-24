@@ -13,7 +13,7 @@ class SymptomDB:
     objective : list[SymptomCategory]
     subjective : list[SymptomCategory]
 
-    def fromPath(self : Self, path : str, attributes : dict[str, list[str]]) -> Symptom:
+    def fromPath(self : Self, path : str) -> Symptom:
         parts = path.split("/")
         if len(parts) != 3:
             raise ValueError(f"Invalid symptom path {path!r}. Expected format: 'familiy/category/symptom'.")
@@ -33,22 +33,10 @@ class SymptomDB:
         if needle is None:
             raise ValueError(f"Invalid symptom path {path!r}. Unknown category {parts[1]!r}.")
 
-        output = None
         for symptom in category.symptoms():
             if symptom.name == parts[2]:
-                output = symptom.instantiate()
-                break;
-        if output is None:
-            raise ValueError(f"Invalid symptom path {path!r}. Unknown symptom {parts[2]!r}.")
-
-        for name, values in attributes.items():
-            if name not in symptom.attributes:
-                raise ValueError(f"Invalid attribute {name!r} for symptom {parts[2]!r}.")
-            for x in values:
-                if x not in symptom.attributes[name].values:
-                    raise ValueError(f"Invalid attribute value {x!r} for attribute {name!r}.")
-                output.attributes[name].selection.append(x)
-        return output
+                return symptom
+        raise ValueError(f"Invalid symptom path {path!r}. Unknown symptom {parts[2]!r}.")
 
     @staticmethod
     def deserialize(data : dict):

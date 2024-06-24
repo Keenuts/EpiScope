@@ -104,39 +104,31 @@ def test_deserialize():
 def test_frompath():
     db = SymptomDB.deserialize(SAMPLE_DB)
 
-    instance = db.fromPath("subjective_symptoms/category1/Symptom1", { "topography": ["Body"] })
+    symptom = db.fromPath("subjective_symptoms/category1/Symptom1")
 
-    assert instance.isInstance()
-    assert instance.name == "Symptom1"
-    assert instance.attributes['topography'].selection == [ "Body" ]
-    assert instance.attributes['direction'].selection == []
+    assert not symptom.isInstance()
+    assert symptom.name == "Symptom1"
 
 def test_frompath_bad_path():
     db = SymptomDB.deserialize(SAMPLE_DB)
     with pytest.raises(ValueError) as e:
-        instance = db.fromPath("randomcategory1/Symptom1", { "topography": ["Body"] })
+        symptom = db.fromPath("randomcategory1/Symptom1")
     assert str(e.value) == "Invalid symptom path 'randomcategory1/Symptom1'. Expected format: 'familiy/category/symptom'."
 
 def test_frompath_bad_family():
     db = SymptomDB.deserialize(SAMPLE_DB)
     with pytest.raises(ValueError) as e:
-        instance = db.fromPath("y/x/Symptom1", { "topography": ["Body"] })
+        symptom = db.fromPath("y/x/Symptom1")
     assert str(e.value) == "Invalid symptom path 'y/x/Symptom1'. Unknown family 'y'."
 
 def test_frompath_bad_category():
     db = SymptomDB.deserialize(SAMPLE_DB)
     with pytest.raises(ValueError) as e:
-        instance = db.fromPath("subjective_symptoms/x/Symptom1", { "topography": ["Body"] })
+        symptom = db.fromPath("subjective_symptoms/x/Symptom1")
     assert str(e.value) == "Invalid symptom path 'subjective_symptoms/x/Symptom1'. Unknown category 'x'."
 
 def test_frompath_bad_symptom():
     db = SymptomDB.deserialize(SAMPLE_DB)
     with pytest.raises(ValueError) as e:
-        instance = db.fromPath("subjective_symptoms/category1/SymptomX", { "topography": ["Body"] })
+        symptom = db.fromPath("subjective_symptoms/category1/SymptomX")
     assert str(e.value) == "Invalid symptom path 'subjective_symptoms/category1/SymptomX'. Unknown symptom 'SymptomX'."
-
-def test_frompath_bad_attribute():
-    db = SymptomDB.deserialize(SAMPLE_DB)
-    with pytest.raises(ValueError) as e:
-        instance = db.fromPath("subjective_symptoms/category1/Symptom1", { "lateralized": ["Body"] })
-    assert str(e.value) == "Invalid attribute 'lateralized' for symptom 'Symptom1'."
