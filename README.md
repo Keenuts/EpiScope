@@ -36,3 +36,19 @@ To run the app:
 . venv/bin/activate
 python src/app.py
 ```
+
+**Development**
+---------------
+
+This section assumes the environment is already setup.
+To run all tests:
+
+```bash
+pytest
+```
+
+To run the static type analysis:
+
+```bash
+mypy
+```
