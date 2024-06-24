@@ -301,3 +301,34 @@ def test_serialize_attributes():
                 "custom_attr": [ "b" ]
             }
     }
+
+def test_instance_no_change_model():
+    symptom = Symptom.deserialize({}, {
+        "name": "test"
+    })
+
+    instance = symptom.instantiate()
+    instance.name = "something"
+
+    assert symptom.name == "test"
+    assert instance.name == "something"
+
+def test_instance_no_change_attribute_model():
+    attribute = Attribute("attr", AttributeType.MIX, values=["a", "b"], selection = [])
+    symptom = Symptom.deserialize({ "attr": attribute }, {
+        "name": "test",
+        "attributes": [ "attr" ],
+        "custom_attributes": [
+            {
+                "name": "custom_attr",
+                "type": "mix",
+                "values": [ "a", "b" ]
+            }
+        ]
+    })
+
+    instance = symptom.instantiate()
+    instance.attributes['attr'].selection = [ 'a' ]
+
+    assert instance.attributes['attr'].selection == [ 'a' ]
+    assert symptom.attributes['attr'].selection == []

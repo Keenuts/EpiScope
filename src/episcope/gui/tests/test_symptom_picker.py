@@ -120,6 +120,24 @@ def test_mix_attribute_checkbox_widget(qtbot):
     assert children[0].options()[0].text() == "head"
     assert children[0].options()[1].text() == "body"
 
+def test_mix_attribute_checkbox_widget_selection(qtbot):
+    setLanguage("english")
+    db = defaultSymptomDB()
+    symptom = db.fromPath("objective_symptoms/Cognitive/Heautoscopy", {})
+    instance = symptom.instantiate()
+    instance.attributes['topography'].selection = ['head']
+
+    w = create(qtbot, db, instance, add = False)
+
+    children = w.findChildren(MixPicker, options=Qt.FindDirectChildrenOnly)
+    assert len(children) == 1
+    assert children[0].name() == "topography"
+    assert len(children[0].options()) == 2
+    assert children[0].options()[0].text() == "head"
+    assert children[0].options()[0].isChecked() is True
+    assert children[0].options()[1].text() == "body"
+    assert children[0].options()[1].isChecked() is False
+
 def test_exclusive_attribute_radio_widget(qtbot):
     setLanguage("english")
 
@@ -133,3 +151,21 @@ def test_exclusive_attribute_radio_widget(qtbot):
     assert len(children[0].options()) == 2
     assert children[0].options()[0].text() == "cephalic"
     assert children[0].options()[1].text() == "epigastric"
+
+def test_exclusive_attribute_radio_widget_selection(qtbot):
+    setLanguage("english")
+
+    db = defaultSymptomDB()
+    symptom = db.fromPath("objective_symptoms/Sensory/Abdominal aura", {})
+    instance = symptom.instantiate()
+    instance.attributes['direction'].selection = ['epigastric']
+    w = create(qtbot, db, instance, add = False)
+
+    children = w.findChildren(ExclusivePicker, options=Qt.FindDirectChildrenOnly)
+    assert len(children) == 1
+    assert children[0].name() == "direction"
+    assert len(children[0].options()) == 2
+    assert children[0].options()[0].text() == "cephalic"
+    assert children[0].options()[0].isChecked() == False
+    assert children[0].options()[1].text() == "epigastric"
+    assert children[0].options()[1].isChecked() == True

@@ -7,6 +7,7 @@ from schema import Schema, Optional, SchemaError, Or
 
 import json
 import traceback
+import copy
 
 from episcope.core import Attribute, AttributeType
 
@@ -18,7 +19,7 @@ class Symptom:
     is_instance : bool
 
     def instantiate(self : Self) -> Self:
-        output = replace(self)
+        output = copy.deepcopy(self)
         output.is_instance = True
         return output
 
