@@ -12,7 +12,8 @@ from PySide6.QtWidgets import (QAbstractItemView,
                                QRadioButton,
                                QTreeView,
                                QVBoxLayout,
-                               QWidget)
+                               QWidget,
+                               QSizePolicy)
 
 from episcope.localization import I18N
 from episcope.core import Symptom, Attribute, AttributeType, SymptomDB
@@ -83,8 +84,9 @@ class MixPicker(AttributeWidget):
             self._addOption(w)
 
 class AttributeEditor(QDialog):
-    def __init__(self, database : SymptomDB, model : Symptom, add = True):
-        super().__init__()
+    def __init__(self, database : SymptomDB, model : Symptom, add = True, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setWindowFlags(Qt.Dialog)
         self._model = model
 
         if add:
@@ -117,6 +119,10 @@ class AttributeEditor(QDialog):
             self._layout.addWidget(widget)
         self._layout.addWidget(self._buttonBox)
         self.setLayout(self._layout)
+
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.adjustSize()
+
         self._checkFormValid()
 
     @Slot()
