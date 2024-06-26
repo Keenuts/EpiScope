@@ -10,6 +10,13 @@ class BlockType(Enum):
     SYMPTOM = 1
 
 @dataclass
+class ReportInfo:
+    patient : str
+    doctor : str
+    date : str
+    notes : str
+
+@dataclass
 class TimelineItem:
     identifier : int
     symptom : Symptom
@@ -112,12 +119,12 @@ class Timeline():
             })
         return json.dumps(output, indent=4)
 
-    def toReport(self : Self) -> str:
-        observations = [ "FIXME", "FIXME" ]
+    def toReport(self : Self, info : ReportInfo) -> str:
+        observations = info.notes.split("\n")
         output = []
-        output.append("Patient number: FIXME")
-        output.append("Doctor name: FIXME")
-        output.append("Date: FIXME")
+        output.append("Patient number: {}".format(info.patient))
+        output.append("Doctor name: {}".format(info.doctor))
+        output.append("Date: {}".format(info.date))
         output.append("")
         output.append("Observations:")
         output += [ "  " + x for x in observations ]

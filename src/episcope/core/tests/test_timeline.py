@@ -1,11 +1,15 @@
 import episcope.core
 import pytest
 import schema
-from episcope.core import Attribute, AttributeType, Symptom, SymptomCategory, Timeline
+from episcope.core import Attribute, AttributeType, Symptom, SymptomCategory, Timeline, ReportInfo
 
 @pytest.fixture()
 def category() -> SymptomCategory:
     return SymptomCategory("objective", "category")
+
+@pytest.fixture()
+def sample_report_info() -> ReportInfo:
+    return ReportInfo("AB12", "John Smith", "2024-06-01", "Some notes\non a new line")
 
 @pytest.fixture()
 def a(category) -> Symptom:
@@ -28,7 +32,7 @@ def c(category) -> Symptom:
 def test_default():
     timeline = Timeline()
 
-def test_default():
+def test_default(sample_report_info):
     timeline = Timeline()
 
     assert timeline.getSymptoms() == []
@@ -36,14 +40,14 @@ def test_default():
     assert timeline.toJSON() == "[]"
     assert timeline.getNextSymptom(0) is None
     assert timeline.getPreviousSymptom(0) is None
-    assert timeline.toReport() == \
-"""Patient number: FIXME
-Doctor name: FIXME
-Date: FIXME
+    assert timeline.toReport(sample_report_info) == \
+"""Patient number: AB12
+Doctor name: John Smith
+Date: 2024-06-01
 
 Observations:
-  FIXME
-  FIXME
+  Some notes
+  on a new line
 
 Chronology:
 """
@@ -201,22 +205,22 @@ def test_toJSON(a, b, c):
     }
 ]"""
 
-def test_toReport(a, b, c):
+def test_toReport(a, b, c, sample_report_info):
     timeline = Timeline()
     timeline.addSymptom(c, 2, 10)
     timeline.addSymptom(a, 0, 10)
     timeline.addSymptom(b, 1, 10)
 
-    output = timeline.toReport()
+    output = timeline.toReport(sample_report_info)
 
     assert output == \
-"""Patient number: FIXME
-Doctor name: FIXME
-Date: FIXME
+"""Patient number: AB12
+Doctor name: John Smith
+Date: 2024-06-01
 
 Observations:
-  FIXME
-  FIXME
+  Some notes
+  on a new line
 
 Chronology:
    0 - start 00:00, duration 00:00, (end 00:00):

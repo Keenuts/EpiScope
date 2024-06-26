@@ -192,7 +192,7 @@ class TimelineBlock(TimelineElement):
         brush.setStyle(Qt.SolidPattern)
         brush.setColor(QColor.fromRgb(81, 176, 245))
         painter.setBrush(brush)
-        painter.drawRoundedRect(QRect(self.x(), self.y(), self.width(), self.height()), 2, 2)
+        painter.drawRoundedRect(QRect(self.x(), self.y() + 1, self.width(), self.height() - 1), 2, 2)
 
     def _drawText(self : Self, painter : QPainter, availableSpace : int) -> None:
         if self._textWidth == 0:

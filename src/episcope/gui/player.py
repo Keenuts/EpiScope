@@ -19,8 +19,8 @@ from typing import Self, Optional
 import sys
 import json
 from episcope.localization import I18N
-from episcope.core import Timeline, Symptom, SymptomCategory, SymptomDB, Attribute
-from episcope.gui import TimelineWidget, AttributeEditor, SymptomPickerList
+from episcope.core import Timeline, Symptom, SymptomCategory, SymptomDB, Attribute, ReportInfo
+from episcope.gui import TimelineWidget, AttributeEditor, SymptomPickerList, ReportEditor
 
 AVI = "video/x-msvideo"  # AVI
 MP4 = 'video/mp4'
@@ -289,6 +289,12 @@ class Player(QMainWindow):
         self._default_location = dialog.directory().absolutePath()
         return dialog.selectedFiles()[0]
 
+    def _doReportDialog(self : Self) -> ReportInfo:
+        dialog = ReportEditor()
+        if not dialog.exec():
+            return None
+        return dialog.data()
+
     def action_export(self : Self) -> None:
         path = self._doSaveDialog(JSON_MIME_TYPES)
         if path is None:
@@ -297,11 +303,14 @@ class Player(QMainWindow):
             f.write(self._player.export().toJSON())
 
     def action_export_report(self : Self):
+        data = self._doReportDialog()
+        if data is None:
+            return
         path = self._doSaveDialog(TXT_MIME_TYPES)
         if path is None:
             return
         with open(path, "w+") as f:
-            f.write(self._player.export().toReport())
+            f.write(self._player.export().toReport(data))
 
     def action_import_video(self : Self):
         file_dialog = QFileDialog(self)
