@@ -152,6 +152,7 @@ class MainWidget(QWidget):
         if not dialog.exec():
             return None
         symptom.attributes = dialog.symptom().attributes
+        self._timelineWidget.invalidateSymptomsContent()
 
     def _player_position_changed(self, position):
         self._timelineWidget.updateCursorPosition(position)

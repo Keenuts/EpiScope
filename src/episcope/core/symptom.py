@@ -18,6 +18,15 @@ class Symptom:
     category : SymptomCategory
     is_instance : bool
 
+    def __init__(self : Self, name : str, attributes : dict[str, Attribute], category : SymptomCategory, is_instance : bool) -> None:
+        self.name = name
+        self.attributes = attributes
+        self.category = category
+        self.is_instance = is_instance
+
+        if 'notes' not in self.attributes:
+            self.attributes['notes'] = Attribute('notes', AttributeType.TEXT, [], [])
+
     def instantiate(self : Self) -> Self:
         output = copy.deepcopy(self)
         output.is_instance = True
@@ -51,6 +60,22 @@ class Symptom:
         }
 
     @staticmethod
+    def _checkAttribute(name : str, selection : list[str], global_attributes : dict[Attribute]) -> None:
+        if name not in global_attributes:
+            raise ValueError(f"Unknown global attribute {name!r}.")
+
+        attribute = global_attributes[name]
+        if attribute.type == AttributeType.TEXT:
+            return
+
+        if selection is None:
+            return
+
+        for item in selection:
+            if item not in attribute.values:
+                raise ValueError(f"Unknown value {item!r} for attribute {name!r}.")
+
+    @staticmethod
     def deserialize(global_attributes : dict[Attribute], data : dict):
         try:
             data = Symptom.validateSchema(data)
@@ -67,13 +92,10 @@ class Symptom:
                 attributes_to_parse = data['attributes']
 
             for name, values in attributes_to_parse.items():
-                if name not in global_attributes:
-                    raise ValueError(f"Unknown global attribute {name!r}.")
+                Symptom._checkAttribute(name, values, global_attributes)
+
                 attributes[name] = global_attributes[name]
                 if values is not None:
-                    for x in values:
-                        if x not in global_attributes[name].values:
-                            raise ValueError(f"Unknown value {x!r} for attribute {name!r}.")
                     attributes[name].selection = values
                     is_instance = True
 

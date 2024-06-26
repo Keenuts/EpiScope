@@ -9,6 +9,7 @@ class AttributeType(Enum):
     GENERATOR = 0
     EXCLUSIVE = 1
     MIX = 2
+    TEXT = 3
 
     @staticmethod
     def contains(value : str) -> bool:
@@ -32,6 +33,9 @@ class Attribute:
         if self.type == AttributeType.EXCLUSIVE:
             assert len(self.selection) == 1
             output += self.selection[0]
+        elif self.type == AttributeType.TEXT:
+            assert len(self.selection) == 1
+            output += f"\n{self.selection[0]}"
         else:
             output += ", ".join(self.selection)
         return output
@@ -46,17 +50,29 @@ class Attribute:
     def deserialize(data : dict):
         try:
             data = Attribute.validateSchema(data)
+
+            attribute_type = AttributeType[data['type'].upper()]
+            if attribute_type != AttributeType.TEXT:
+                if len(data['values']) == 0:
+                    raise SchemaError("values field is required for non-text attributes.")
+                for x in data['selection']:
+                    if x not in data['values']:
+                        raise ValueError(f"Unknown value {x!r} for attribute {data['name']!r}.")
+
+            if attribute_type != AttributeType.MIX and len(data['selection']) > 1:
+                raise ValueError(f"Too many elements in field 'selection' of attribute {data['name']!r}.")
         except SchemaError as e:
             e.add_note('Parsed item was:\n{}'.format(json.dumps(data, indent=4)))
             raise
-        return Attribute(data['name'], AttributeType[data['type'].upper()], data['values'], selection = data['selection'])
+
+        return Attribute(data['name'], attribute_type, data['values'], selection = data['selection'])
 
     @staticmethod
     def validateSchema(data : dict):
         schema = Schema({
                 'name': str,
                 'type': And(str, lambda x: AttributeType.contains(x.upper())),
-                'values': [ str ],
+                Optional('values', default=[]): [ str ],
                 Optional('selection', default=[]): [ str ],
 
         })

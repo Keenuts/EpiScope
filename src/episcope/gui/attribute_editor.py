@@ -13,7 +13,8 @@ from PySide6.QtWidgets import (QAbstractItemView,
                                QTreeView,
                                QVBoxLayout,
                                QWidget,
-                               QSizePolicy)
+                               QSizePolicy,
+                               QTextEdit)
 
 from episcope.localization import I18N
 from episcope.core import Symptom, Attribute, AttributeType, SymptomDB
@@ -89,6 +90,21 @@ class MixPicker(AttributeWidget):
                 w.setChecked(option in attribute.selection)
             self._addOption(w)
 
+class TextEdit(AttributeWidget):
+    @override
+    def _initOptions(self : Self, attribute : Attribute, default_values : set[str]) -> None:
+        text = attribute.selection[0] if len(attribute.selection) != 0 else ""
+        edit = QTextEdit(text)
+        edit.setAcceptRichText(False)
+        self._addOption(edit)
+
+    @override
+    def selection(self):
+        text = self._options[0].toPlainText().rstrip()
+        if len(text) == 0:
+            return []
+        return [ text ]
+
 class AttributeEditor(QDialog):
     _default_selection : dict[str, set[str]] = {}
 
@@ -116,8 +132,12 @@ class AttributeEditor(QDialog):
             widget : Union[ExclusivePicker, MixPicker]
             if item.type == AttributeType.EXCLUSIVE:
                 widget = ExclusivePicker(item, AttributeEditor._defaultSelection(name))
-            else:
+            elif item.type == AttributeType.MIX:
                 widget = MixPicker(item, AttributeEditor._defaultSelection(name))
+            elif item.type == AttributeType.TEXT:
+                widget = TextEdit(item, set())
+            else:
+                raise AssertionError("Unhandled attribute type in editor.")
             widget.clicked.connect(self._checkFormValid)
             self._attribute_widgets.append(widget)
 

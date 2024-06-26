@@ -5,7 +5,7 @@ from pytestqt.qt_compat import qt_api
 from PySide6.QtWidgets import QWidget, QPushButton, QTabWidget, QToolButton, QStackedWidget, QDialogButtonBox
 
 from episcope.core import SymptomDB, Symptom
-from episcope.gui import AttributeEditor, MixPicker, ExclusivePicker
+from episcope.gui import AttributeEditor, MixPicker, ExclusivePicker, TextEdit
 from episcope.localization import setLanguage
 from episcope.gui.tests import defaultSymptomDB
 
@@ -112,8 +112,9 @@ def test_no_attribute_no_widget(qtbot):
 
     children = w.findChildren(QWidget, options=Qt.FindDirectChildrenOnly)
 
-    assert len(children) == 1
-    assert type(children[0]) is QDialogButtonBox
+    assert len(children) == 2
+    assert type(children[0]) is TextEdit
+    assert type(children[1]) is QDialogButtonBox
 
 def test_mix_attribute_checkbox_widget(qtbot):
     db = defaultSymptomDB()
@@ -189,6 +190,22 @@ def test_exclusive_attribute_radio_widget_default_selection(qtbot):
     assert not picker.options()[0].isChecked()
     assert picker.options()[1].isChecked()
 
+def test_exclusive_attribute_radio_widget_default_selection(qtbot):
+    db = defaultSymptomDB()
+    symptom = db.fromPath("objective_symptoms/Sensory/Abdominal aura")
+
+    w = create(qtbot, db, symptom)
+    edit = w.findChild(TextEdit, options=Qt.FindDirectChildrenOnly)
+    edit.options()[0].setPlainText("something")
+    qtbot.mouseClick(checkNonNull(findButton(w, "Create")), Qt.MouseButton.LeftButton)
+
+    assert symptom.attributes['notes'].selection == [ ]
+
+    w = create(qtbot, db, symptom)
+    edit = w.findChild(TextEdit, options=Qt.FindDirectChildrenOnly)
+
+    assert edit.options()[0].toPlainText() == ""
+
 def test_exclusive_attribute_radio_widget_default_selection_on_reject(qtbot):
     db = defaultSymptomDB()
     symptom = db.fromPath("objective_symptoms/Sensory/Abdominal aura")
@@ -233,3 +250,22 @@ def test_exclusive_attribute_symptom_creation(qtbot):
     assert result.isInstance()
     assert result.name == "Abdominal aura"
     assert result.attributes['direction'].selection == [ "cephalic" ]
+
+def test_exclusive_attribute_symptom_creation_with_notes(qtbot):
+    db = defaultSymptomDB()
+    symptom = db.fromPath("objective_symptoms/Sensory/Abdominal aura")
+
+    w1 = create(qtbot, db, symptom)
+    picker = w1.findChild(ExclusivePicker, options=Qt.FindDirectChildrenOnly)
+    notes = w1.findChild(TextEdit, options=Qt.FindDirectChildrenOnly)
+
+    picker.options()[0].click()
+    picker.options()[1].click()
+    notes.options()[0].setPlainText("some notes\n about the symptom")
+    qtbot.mouseClick(checkNonNull(findButton(w1, "Create")), Qt.MouseButton.LeftButton)
+
+    result = w1.symptom()
+    assert result.isInstance()
+    assert result.name == "Abdominal aura"
+    assert result.attributes['direction'].selection == [ "epigastric" ]
+    assert result.attributes['notes'].selection == [ "some notes\n about the symptom" ]

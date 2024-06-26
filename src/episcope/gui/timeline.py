@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (QGraphicsItem,
                                QWidget)
 from PySide6.QtCore import Signal, Qt, QRect, QPoint, QRectF, QPointF
 from PySide6.QtGui import QPainter, QFont, QBrush, QColor, QFontMetrics, QPen, QAction, QWheelEvent
-from typing import Self, Optional
+from typing import Self, Optional, override
 
 from episcope.localization import I18N
 from episcope.core import Timeline, Symptom, Attribute
@@ -107,6 +107,9 @@ class TimelineElement(QGraphicsItem):
             return False
         return True
 
+    def invalidateData(self : Self) -> None:
+        pass
+
 class TimelineBlock(TimelineElement):
     HANDLE_WIDTH = 6
     HANDLE_MARGIN = 3
@@ -118,9 +121,12 @@ class TimelineBlock(TimelineElement):
         super().__init__(x, LINE_START_PX, width, LINE_HEIGHT_PX, *kargs, **kwargs)
         self._line = 0
         self._symptom = symptom
-        self._computeText()
+        self.invalidateData()
 
+    @override
+    def invalidateData(self : Self) -> None:
         self.setToolTip(self._getTooltip())
+        self._computeText()
 
     def _getTooltip(self : Self) -> str:
         return self.symptom().getTooltipText()
@@ -129,7 +135,7 @@ class TimelineBlock(TimelineElement):
         return self._symptom
 
     def _onSizeChanged(self : Self) -> None:
-        self._computeText()
+        self.invalidateData()
 
     # Override of the base class y(): block's height depends on its line.
     def y(self):
@@ -548,6 +554,10 @@ class TimelineScene(QGraphicsScene):
         self.setUnit(self._minUnit())
         self.setOffset(0)
 
+    def invalidateSymptomsContent(self : Self) -> None:
+        for item in self.items():
+            item.invalidateData()
+
     def _handleLeftClick(self : Self, event : QGraphicsSceneMouseEvent) -> None:
         if self._cursor.intersects(event.scenePos().x(), event.scenePos().y()):
             self._dragState = DragState(event.scenePos(), self._cursor)
@@ -797,6 +807,9 @@ class TimelineWidget(QWidget):
         assert symptom.isInstance()
         duration = self._scene.defaultBlockDuration()
         self._scene.addBlock(TimelineBlock(symptom, time, duration))
+
+    def invalidateSymptomsContent(self : Self) -> None:
+        self._scene.invalidateSymptomsContent()
 
     def setTimeline(self : Self, timeline : Timeline):
         self._scene.reset()
