@@ -31,6 +31,7 @@ QUICKTIME = 'video/quicktime'
 
 WANTED_VIDEO_MIME_TYPES = [ MP4, AVI, MPEG, MKV, WEBM, QUICKTIME ]
 JSON_MIME_TYPES = [ 'application/json' ]
+TXT_MIME_TYPES = [ 'text/plain' ]
 
 class ToolbarWidget(QWidget):
     play = Signal()
@@ -223,6 +224,9 @@ class Player(QMainWindow):
                                 self,
                                 shortcut=QKeySequence(Qt.CTRL | Qt.Key_E),
                                 triggered=self.action_export)
+        action_export_report = QAction(I18N("menu_files_export_report"),
+                                self,
+                                triggered=self.action_export_report)
         action_import_video = QAction(I18N("menu_files_import_video"),
                                self,
                                shortcut=QKeySequence(Qt.CTRL | Qt.Key_I),
@@ -238,6 +242,7 @@ class Player(QMainWindow):
 
         file_menu.addAction(action_new)
         file_menu.addAction(action_export)
+        file_menu.addAction(action_export_report)
         file_menu.addAction(action_import_video)
         file_menu.addAction(action_import_timeline)
         file_menu.addAction(action_exit)
@@ -255,17 +260,7 @@ class Player(QMainWindow):
 
     def _loadSymptom(self : Self, path : str, attributes : dict[str, list[str]]) -> Symptom:
         model = self._symptoms.fromPath(path)
-        output = model.instantiate()
-
-        for name, values in attributes.items():
-            if name not in model.attributes:
-                raise ValueError(f"Invalid attribute {name!r} for symptom {parts[2]!r}.")
-            for x in values:
-                if x not in model.attributes[name].values:
-                    raise ValueError(f"Invalid attribute value {x!r} for attribute {name!r}.")
-                output.attributes[name].selection.append(x)
-        return output
-
+        return model.instantiateFromJSON(attributes)
 
     def _loadTimeline(self : Self, filename : str) -> None:
         with open(filename, "r") as f:
@@ -281,20 +276,32 @@ class Player(QMainWindow):
     def action_reset(self : Self):
         self._player.setTimeline(Timeline())
 
-    def action_export(self : Self) -> None:
+    def _doSaveDialog(self : Self, mime_types : list[str]) -> Optional[str]:
         dialog = QFileDialog(self)
-        dialog.setMimeTypeFilters(JSON_MIME_TYPES)
-        dialog.selectMimeTypeFilter(JSON_MIME_TYPES[0])
+        dialog.setMimeTypeFilters(mime_types)
+        dialog.selectMimeTypeFilter(mime_types[0])
         dialog.setDirectory(self._default_location)
         dialog.setFileMode(QFileDialog.AnyFile)
         dialog.setAcceptMode(QFileDialog.AcceptSave)
         if dialog.exec() != QDialog.Accepted:
-            return
+            return None
 
         self._default_location = dialog.directory().absolutePath()
-        path = dialog.selectedFiles()[0]
+        return dialog.selectedFiles()[0]
+
+    def action_export(self : Self) -> None:
+        path = self._doSaveDialog(JSON_MIME_TYPES)
+        if path is None:
+            return
         with open(path, "w+") as f:
             f.write(self._player.export().toJSON())
+
+    def action_export_report(self : Self):
+        path = self._doSaveDialog(TXT_MIME_TYPES)
+        if path is None:
+            return
+        with open(path, "w+") as f:
+            f.write(self._player.export().toReport())
 
     def action_import_video(self : Self):
         file_dialog = QFileDialog(self)

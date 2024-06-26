@@ -35,7 +35,7 @@ class Attribute:
             output += self.selection[0]
         elif self.type == AttributeType.TEXT:
             assert len(self.selection) == 1
-            output += f"\n{self.selection[0]}"
+            output += "\n" + "\n".join([ "  " + x for x in self.selection[0].split("\n") ])
         else:
             output += ", ".join(self.selection)
         return output

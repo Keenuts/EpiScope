@@ -16,6 +16,12 @@ class TimelineItem:
     start : int
     duration : int
 
+def millisToTimeString(millis : int) -> str:
+    seconds = millis // 1000
+    minutes = seconds // 60
+    seconds = seconds % 60
+    return "{:02}:{:02}".format(minutes, seconds)
+
 class Timeline():
     def __init__(self : Self) -> None:
         self._symptoms : dict[int, TimelineItem] = {}
@@ -56,6 +62,8 @@ class Timeline():
                       symptom : Optional[Symptom] = None,
                       start : Optional[int] = None,
                       end : Optional[int] = None) -> bool:
+        if identifier not in self._symptoms:
+            raise KeyError(f"Invalid identifier {identifier}.")
         if symptom is not None:
             self._symptoms[identifier].symptom = symptom
 
@@ -103,3 +111,30 @@ class Timeline():
                 'end': int(item.start + item.duration)
             })
         return json.dumps(output, indent=4)
+
+    def toReport(self : Self) -> str:
+        observations = [ "FIXME", "FIXME" ]
+        output = []
+        output.append("Patient number: FIXME")
+        output.append("Doctor name: FIXME")
+        output.append("Date: FIXME")
+        output.append("")
+        output.append("Observations:")
+        output += [ "  " + x for x in observations ]
+        output.append("")
+        output.append("Chronology:")
+
+        index = 0
+        for item in self.getSymptoms():
+            symptom = item.symptom.getTooltipText().split("\n")
+            symptom = [ "\t" + x for x in symptom ]
+            start = millisToTimeString(item.start)
+            end = millisToTimeString(item.start + item.duration)
+            duration = millisToTimeString(item.duration)
+
+            output.append(" {:3} - start {}, duration {}, (end {}):".format(index, start, duration, end))
+            output += symptom
+            index += 1
+        output.append("")
+
+        return "\n".join(output)

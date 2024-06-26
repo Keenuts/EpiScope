@@ -173,7 +173,7 @@ def test_tooltip_text():
     })
 
     assert attribute.getTooltipText() == "notes: \n" + \
-                                         "some text"
+                                         "  some text"
 
 def test_tooltip_text_bad_selection_empty():
     with pytest.raises(AssertionError):
@@ -193,8 +193,8 @@ def test_tooltip_text_multiline():
     })
 
     assert attribute.getTooltipText() == "notes: \n" + \
-                                         "some text\n" + \
-                                         "some other line"
+                                         "  some text\n" + \
+                                         "  some other line"
 
 def test_tooltip_text_escaping():
     attribute = Attribute.deserialize({
@@ -204,4 +204,4 @@ def test_tooltip_text_escaping():
     })
 
     assert attribute.getTooltipText() == "notes: \n" + \
-                                         "some text \"with\" characters"
+                                         "  some text \"with\" characters"

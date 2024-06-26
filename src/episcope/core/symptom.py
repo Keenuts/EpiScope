@@ -32,6 +32,22 @@ class Symptom:
         output.is_instance = True
         return output
 
+    def instantiateFromJSON(self : Self, attributes : dict[str, list[str]]) -> Self:
+        output = self.instantiate()
+
+        for name, values in attributes.items():
+            if name not in self.attributes:
+                raise ValueError(f"Invalid attribute {name!r} for symptom {parts[2]!r}.")
+
+            output.attributes[name].selection = values
+            if self.attributes[name].type == AttributeType.TEXT:
+                continue
+
+            for x in values:
+                if x not in self.attributes[name].values:
+                    raise ValueError(f"Invalid attribute value {x!r} for attribute {name!r}.")
+        return output
+
     def isInstance(self : Self) -> bool:
         return self.is_instance
 
@@ -41,7 +57,10 @@ class Symptom:
         for _, attribute in self.attributes.items():
             if len(attribute.selection) == 0:
                 continue;
-            output += "\n - {}".format(attribute.getTooltipText())
+            if attribute.type == AttributeType.TEXT:
+                output += "\n{}".format(attribute.getTooltipText())
+            else:
+                output += "\n - {}".format(attribute.getTooltipText())
         return output
 
     def serialize(self : Self) -> dict:
