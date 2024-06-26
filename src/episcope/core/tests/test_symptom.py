@@ -332,3 +332,55 @@ def test_instance_no_change_attribute_model():
 
     assert instance.attributes['attr'].selection == [ 'a' ]
     assert symptom.attributes['attr'].selection == []
+
+def test_tooltip_no_attribute():
+    symptom = Symptom.deserialize({}, { "name": "test" })
+    instance = symptom.instantiate()
+
+    assert instance.getTooltipText() == "test"
+
+def test_tooltip_no_attribute_set():
+    attribute = Attribute("attr", AttributeType.MIX, values=["a", "b"], selection = [])
+    symptom = Symptom.deserialize({ "attr": attribute }, {
+        "name": "test",
+        "attributes": [ "attr" ],
+    })
+
+    instance = symptom.instantiate()
+
+    assert instance.getTooltipText() == "test"
+
+def test_tooltip_mix_attribute_set():
+    attribute = Attribute("attr", AttributeType.MIX, values=["a", "b"], selection = [])
+    symptom = Symptom.deserialize({ "attr": attribute }, {
+        "name": "test",
+        "attributes": [ "attr" ],
+    })
+
+    instance = symptom.instantiate()
+    instance.attributes['attr'].selection = [ 'a', 'b' ]
+
+    assert instance.getTooltipText() == "test\n" + \
+                                        " - attr: a, b"
+
+def test_tooltip_multiple_attribute_set():
+    attribute = Attribute("attr", AttributeType.MIX, values=["a", "b"], selection = [])
+    symptom = Symptom.deserialize({ "attr": attribute }, {
+        "name": "test",
+        "attributes": [ "attr" ],
+        "custom_attributes": [
+            {
+                "name": "custom_attr",
+                "type": "exclusive",
+                "values": [ "a", "b" ]
+            }
+        ]
+    })
+
+    instance = symptom.instantiate()
+    instance.attributes['attr'].selection = [ 'a', 'b' ]
+    instance.attributes['custom_attr'].selection = [ 'a' ]
+
+    assert instance.getTooltipText() == "test\n" + \
+                                        " - attr: a, b\n" + \
+                                        " - custom_attr: a"

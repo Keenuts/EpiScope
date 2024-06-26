@@ -51,3 +51,33 @@ def test_bad_value_types():
             "type": "mix",
             "values": 123
         })
+
+def test_tooltip_exclusive():
+    attribute = Attribute.deserialize({
+        "name": "abc",
+        "type": "exclusive",
+        "values": [ "a", "b" ],
+        "selection": [ "a" ]
+    })
+
+    assert attribute.getTooltipText() == "abc: a"
+
+def test_tooltip_mix_single():
+    attribute = Attribute.deserialize({
+        "name": "abc",
+        "type": "mix",
+        "values": [ "a", "b", "c" ],
+        "selection": [ "b" ]
+    })
+
+    assert attribute.getTooltipText() == "abc: b"
+
+def test_tooltip_mix_multiple():
+    attribute = Attribute.deserialize({
+        "name": "abc",
+        "type": "mix",
+        "values": [ "a", "b", "c" ],
+        "selection": [ "b", "a" ]
+    })
+
+    assert attribute.getTooltipText() == "abc: b, a"

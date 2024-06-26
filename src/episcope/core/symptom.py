@@ -26,6 +26,15 @@ class Symptom:
     def isInstance(self : Self) -> bool:
         return self.is_instance
 
+    def getTooltipText(self : Self) -> str:
+        assert self.isInstance()
+        output = self.name
+        for _, attribute in self.attributes.items():
+            if len(attribute.selection) == 0:
+                continue;
+            output += "\n - {}".format(attribute.getTooltipText())
+        return output
+
     def serialize(self : Self) -> dict:
         # For now, this is the only valid usage. If this changes, implement support for it.
         assert self.isInstance()

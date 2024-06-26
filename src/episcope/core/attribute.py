@@ -25,6 +25,17 @@ class Attribute:
     values : list[str]
     selection : list[str]
 
+    def getTooltipText(self : Self) -> str:
+        assert len(self.selection) != 0
+
+        output = "{}: ".format(self.name)
+        if self.type == AttributeType.EXCLUSIVE:
+            assert len(self.selection) == 1
+            output += self.selection[0]
+        else:
+            output += ", ".join(self.selection)
+        return output
+
     def hasSelection(self : Self) -> bool:
         return len(self.selection) != 0
 

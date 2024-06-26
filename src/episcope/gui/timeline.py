@@ -120,6 +120,11 @@ class TimelineBlock(TimelineElement):
         self._symptom = symptom
         self._computeText()
 
+        self.setToolTip(self._getTooltip())
+
+    def _getTooltip(self : Self) -> str:
+        return self.symptom().getTooltipText()
+
     def symptom(self : Self) -> Symptom:
         return self._symptom
 
